@@ -1,0 +1,16 @@
+build
+.*
+index*
+script
+src
+webpack.config.js
+tsconfig.json
+handler.js
+serverless.yml
+yarn.lock
+bin
+.zaprc.json
+*.log
+Dockerfile
+Makefile
+docker-compose.yml
