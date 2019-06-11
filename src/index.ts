@@ -2,11 +2,11 @@
 "use strict";
 
 const findUp = require("find-up");
-const fs = require("fs");
-const _ = require("lodash");
+import fs from 'fs';
+import _ from 'lodash';
+
 const chalk = require("chalk");
 const globby = require("globby");
-const path = require("path");
 
 interface FileLintRegex {
   [key: string]: string[];
@@ -28,7 +28,7 @@ const configPath = findUp.sync([
 ]);
 
 const config: FileLintConfig = configPath
-  ? JSON.parse(fs.readFileSync(configPath))
+  ? JSON.parse(fs.readFileSync(configPath).toString("utf8"))
   : {};
 
 const argv = require("yargs")
