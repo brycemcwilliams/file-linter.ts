@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-"use strict";
 
 const findUp = require("find-up");
 import fs from 'fs';
