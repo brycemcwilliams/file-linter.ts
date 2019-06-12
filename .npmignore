@@ -1,6 +1,6 @@
 build
 .*
-file-lint.json
+file-linter.json
 index*
 script
 src

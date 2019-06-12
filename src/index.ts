@@ -18,14 +18,10 @@ interface FileLintConfig {
 }
 
 const configPath = findUp.sync([
-  ".file-lint",
-  ".file-lint.json",
-  ".file-lintrc",
-  ".file-lintrc.json",
-  "file-lint",
-  "file-lint.json",
-  "file-lintrc",
-  "file-lintrc.json"
+  ".file-linter",
+  ".file-linter.json",
+  "file-linter",
+  "file-linter.json"
 ]);
 
 const config: FileLintConfig = configPath
@@ -37,7 +33,7 @@ require("yargs")
     alias: "r",
     default: false
   })
-  .pkgConf("file-lint")
+  .pkgConf("file-linter")
   .config(config)
   .command(
     "$0",
@@ -72,7 +68,7 @@ require("yargs")
           results
         };
       });
-      console.log(chalk.green(`file-lint [v${pkg.version}]:\n`));
+      console.log(chalk.green(`${pkg.name} [v${pkg.version}]:\n`));
       res.forEach(({ dirName, results }: any) => {
         console.log(chalk.yellow(`${dirName}/`));
         results.forEach(({ fileName, passed }: any) => {

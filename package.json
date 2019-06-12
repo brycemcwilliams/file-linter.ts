@@ -1,15 +1,15 @@
 {
-  "name": "file-lint",
+  "name": "file-linter",
   "version": "0.0.1",
   "description": "Regex File Linter",
-  "main": "./dist/file-lint",
+  "main": "./dist/file-linter",
   "bin": {
-    "file-lint": "./dist/file-lint"
+    "file-lint": "./dist/file-linter"
   },
   "scripts": {
     "prepare": "npm run dist",
     "build": "tsc",
-    "dist": "npm run build && uglifyjs ./build/index.js -o ./dist/file-lint -c -m",
+    "dist": "npm run build && uglifyjs ./build/index.js -o ./dist/file-linter -c -m",
     "dev": "ts-node-dev --respawn --transpileOnly ./src/index.ts",
     "prod": "tsc && node ./build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
