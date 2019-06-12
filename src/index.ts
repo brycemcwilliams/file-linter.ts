@@ -1,11 +1,13 @@
 #!/usr/bin/env node
+"use strict";
 
 const findUp = require("find-up");
 import fs from 'fs';
-import _ from 'lodash';
 
 const chalk = require("chalk");
 const globby = require("globby");
+
+const pkg = require("../package.json");
 
 interface FileLintRegex {
   [key: string]: string[];
@@ -30,7 +32,11 @@ const config: FileLintConfig = configPath
   ? JSON.parse(fs.readFileSync(configPath).toString("utf8"))
   : {};
 
-const argv = require("yargs")
+require("yargs")
+  .option("recursive", {
+    alias: "r",
+    default: false
+  })
   .pkgConf("file-lint")
   .config(config)
   .command(
@@ -38,22 +44,40 @@ const argv = require("yargs")
     "the default command",
     (res: any) => {},
     (argv: any) => {
-      const { regex } = argv;
-      _.mapKeys(regex, async (regexAssersion: string, dirName: string) => {
-        console.log(chalk.green(dirName));
-        console.log(chalk.green(regexAssersion));
-        console.log(chalk.green(__dirname));
-        console.log(chalk.green(__filename));
-        const rec = true;
-        const filesToLint = await globby([dirName], {
-          deep: rec ? true : false
+      const { regex, recursive } = argv;
+      if (!(typeof regex === "object")) {
+        throw new TypeError("Regex values must be of type object");
+      }
+      const res = Object.keys(regex).map((dirName: string) => {
+        const regexAssersion = regex[dirName];
+        if (!(typeof (regexAssersion && dirName) === "string")) {
+          throw new TypeError(
+            "regexAssersion and dirName values must be of type string"
+          );
+        }
+        const filesToLint = globby.sync([dirName], {
+          deep: recursive ? true : false
         });
-        console.log({ filesToLint });
-        const lintResPassed = new RegExp(regexAssersion).test(
-          filesToLint[0].split("/")[1]
-        );
-        console.log({ lintResPassed });
+        const results = filesToLint.map((file: string) => {
+          const lintResPassed = new RegExp(regexAssersion).test(
+            file.split("/")[1]
+          );
+          return {
+            fileName: file.split("/")[1],
+            passed: lintResPassed
+          };
+        });
+        return {
+          dirName,
+          results
+        };
       });
-      console.log(chalk.green("this command will be run by default"));
+      console.log(chalk.green(`file-lint [v${pkg.version}]:\n`));
+      res.forEach(({ dirName, results }: any) => {
+        console.log(chalk.yellow(`${dirName}/`));
+        results.forEach(({ fileName, passed }: any) => {
+          console.log(chalk.green(`  ${fileName} ${passed ? "✓" : "✗"}`));
+        });
+      });
     }
   ).argv;
