@@ -28,6 +28,36 @@ const config: FileLintConfig = configPath
   ? JSON.parse(fs.readFileSync(configPath).toString("utf8"))
   : {};
 
+const displayTotalAssersionResults = (res: any) => {
+  let totalPassed = 0;
+  let totalFailed = 0;
+  let total = 0;
+  res.filter(({ dirName, results }: any) => {
+    results.map(({ fileName, regexAssersion, passed }: any) => {
+      total++;
+    });
+  });
+  res.filter(({ dirName, results }: any) => {
+    results.map(({ fileName, regexAssersion, passed }: any) => {
+      if (passed === true) {
+        totalPassed++;
+      }
+    });
+  });
+  res.filter(({ dirName, results }: any) => {
+    results.map(({ fileName, regexAssersion, passed }: any) => {
+      if (passed === false) {
+        totalPassed--;
+      }
+    });
+  });
+  console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total})`));
+  if (totalFailed > 0) {
+    console.log(chalk.red.bold(`Failed: (${totalFailed}/${total})`));
+    throw new Error("Files failed assersion");
+  }
+};
+
 require("yargs")
   .option("recursive", {
     alias: "r",
@@ -38,7 +68,7 @@ require("yargs")
   .command(
     "$0",
     "the default command",
-    (res: any) => {},
+    () => {},
     (argv: any) => {
       const { regex, recursive } = argv;
       if (!(typeof regex === "object")) {
@@ -60,6 +90,7 @@ require("yargs")
           );
           return {
             fileName: file.split("/")[1],
+            regexAssersion,
             passed: lintResPassed
           };
         });
@@ -70,10 +101,15 @@ require("yargs")
       });
       console.log(chalk.green(`${pkg.name} [v${pkg.version}]:\n`));
       res.forEach(({ dirName, results }: any) => {
-        console.log(chalk.yellow(`${dirName}/`));
-        results.forEach(({ fileName, passed }: any) => {
-          console.log(chalk.green(`  ${fileName} ${passed ? "✓" : "✗"}`));
+        console.log(chalk.yellow(`  ${dirName}/`));
+        results.forEach(({ fileName, regexAssersion, passed }: any) => {
+          console.log(
+            passed
+              ? chalk.green(`    ${fileName} ✓`)
+              : chalk.red(`    ${fileName} ✗ (${regexAssersion})`)
+          );
         });
       });
+      displayTotalAssersionResults(res);
     }
   ).argv;
