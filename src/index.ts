@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 "use strict";
 
-const findUp = require("find-up");
+import chalk from 'chalk';
+import findUp from 'find-up';
 import fs from 'fs';
-
-const chalk = require("chalk");
-const globby = require("globby");
+import globby from 'globby';
+import yargs from 'yargs';
 
 const pkg = require("../package.json");
 
@@ -15,6 +15,17 @@ interface FileLintRegex {
 
 interface FileLintConfig {
   regex: FileLintRegex;
+}
+
+interface FileLintResult {
+  fileName: string;
+  regexAssersion: string;
+  passed: boolean;
+}
+
+interface DirectoryLintResult {
+  dirName: string;
+  results: FileLintResult[];
 }
 
 const configPath = findUp.sync([
@@ -28,88 +39,81 @@ const config: FileLintConfig = configPath
   ? JSON.parse(fs.readFileSync(configPath).toString("utf8"))
   : {};
 
-const displayTotalAssersionResults = (res: any) => {
+const displayTotalAssersionResults = (
+  lintedDirectories: DirectoryLintResult[]
+) => {
+  let total = 0;
   let totalPassed = 0;
   let totalFailed = 0;
-  let total = 0;
-  res.filter(({ dirName, results }: any) => {
-    results.map(({ fileName, regexAssersion, passed }: any) => {
+  lintedDirectories.filter(({ results }: DirectoryLintResult) => {
+    results.map(({ passed }: FileLintResult) => {
       total++;
-    });
-  });
-  res.filter(({ dirName, results }: any) => {
-    results.map(({ fileName, regexAssersion, passed }: any) => {
       if (passed === true) {
         totalPassed++;
-      }
-    });
-  });
-  res.filter(({ dirName, results }: any) => {
-    results.map(({ fileName, regexAssersion, passed }: any) => {
-      if (passed === false) {
-        totalPassed--;
+      } else {
+        totalFailed++;
       }
     });
   });
   console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total})`));
   if (totalFailed > 0) {
     console.log(chalk.red.bold(`Failed: (${totalFailed}/${total})`));
-    throw new Error("Files failed assersion");
+    process.exit(1);
   }
+  process.exit(0);
 };
 
-require("yargs")
+yargs
   .option("recursive", {
     alias: "r",
+    type: "boolean",
+    describe: "Recursively search for files",
     default: false
   })
   .pkgConf("file-linter")
   .config(config)
-  .command(
-    "$0",
-    "the default command",
-    () => {},
-    (argv: any) => {
-      const { regex, recursive } = argv;
-      if (!(typeof regex === "object")) {
-        throw new TypeError("Regex values must be of type object");
+  .command("$0", pkg.description, {}, (argv: any) => {
+    const { regex, recursive } = argv;
+    if (!(typeof regex === "object")) {
+      throw new TypeError("Regex values must be of type object");
+    }
+    const lintedDirectories = Object.keys(regex).map((dirName: string) => {
+      const regexAssersion = regex[dirName];
+      if (!(typeof (regexAssersion && dirName) === "string")) {
+        throw new TypeError(
+          "regexAssersion and dirName values must be of type string"
+        );
       }
-      const res = Object.keys(regex).map((dirName: string) => {
-        const regexAssersion = regex[dirName];
-        if (!(typeof (regexAssersion && dirName) === "string")) {
-          throw new TypeError(
-            "regexAssersion and dirName values must be of type string"
-          );
-        }
-        const filesToLint = globby.sync([dirName], {
-          deep: recursive ? true : false
-        });
-        const results = filesToLint.map((file: string) => {
-          const lintResPassed = new RegExp(regexAssersion).test(
-            file.split("/")[1]
-          );
-          return {
-            fileName: file.split("/")[1],
-            regexAssersion,
-            passed: lintResPassed
-          };
-        });
+      const filesToLint = globby.sync([dirName], {
+        deep: recursive ? true : false
+      });
+      const results = filesToLint.map((file: string) => {
+        const dirSegments = file.split("/");
+        const fileName = dirSegments[dirSegments.length - 1];
+        const passed = new RegExp(regexAssersion).test(fileName);
         return {
-          dirName,
-          results
+          fileName,
+          regexAssersion,
+          passed
         };
       });
-      console.log(chalk.green(`${pkg.name} [v${pkg.version}]:\n`));
-      res.forEach(({ dirName, results }: any) => {
-        console.log(chalk.yellow(`  ${dirName}/`));
-        results.forEach(({ fileName, regexAssersion, passed }: any) => {
+      return {
+        dirName,
+        results
+      };
+    });
+    console.log(chalk.green(`${pkg.name} [v${pkg.version}]:\n`));
+    lintedDirectories.forEach(({ dirName, results }: DirectoryLintResult) => {
+      console.log(chalk.yellow(`  ${dirName}/`));
+      results.forEach(
+        ({ fileName, regexAssersion, passed }: FileLintResult) => {
           console.log(
             passed
               ? chalk.green(`    ${fileName} ✓`)
               : chalk.red(`    ${fileName} ✗ (${regexAssersion})`)
           );
-        });
-      });
-      displayTotalAssersionResults(res);
-    }
-  ).argv;
+        }
+      );
+    });
+    displayTotalAssersionResults(lintedDirectories);
+  }).argv;
