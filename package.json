@@ -1,6 +1,6 @@
 {
   "name": "file-linter",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Regex File Linter",
   "main": "./dist/file-linter",
   "bin": {
