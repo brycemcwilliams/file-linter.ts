@@ -18,14 +18,16 @@ interface FileLintConfig {
 }
 
 interface FileLintResult {
-  fileName: string;
+  dirPath: string[];
+  baseDir?: string;
+  fileName?: string;
   regexAssersion: string;
   passed: boolean;
 }
 
 interface DirectoryLintResult {
   dirName: string;
-  results: FileLintResult[];
+  files: FileLintResult[];
 }
 
 const configPath = findUp.sync([
@@ -38,30 +40,6 @@ const configPath = findUp.sync([
 const config: FileLintConfig = configPath
   ? JSON.parse(fs.readFileSync(configPath).toString("utf8"))
   : {};
-
-const displayTotalAssersionResults = (
-  lintedDirectories: DirectoryLintResult[]
-) => {
-  let total = 0;
-  let totalPassed = 0;
-  let totalFailed = 0;
-  lintedDirectories.filter(({ results }: DirectoryLintResult) => {
-    results.map(({ passed }: FileLintResult) => {
-      total++;
-      if (passed === true) {
-        totalPassed++;
-      } else {
-        totalFailed++;
-      }
-    });
-  });
-  console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total})`));
-  if (totalFailed > 0) {
-    console.log(chalk.red.bold(`Failed: (${totalFailed}/${total})`));
-    process.exit(1);
-  }
-  process.exit(0);
-};
 
 yargs
   .option("recursive", {
@@ -77,43 +55,69 @@ yargs
     if (!(typeof regex === "object")) {
       throw new TypeError("Regex values must be of type object");
     }
-    const lintedDirectories = Object.keys(regex).map((dirName: string) => {
-      const regexAssersion = regex[dirName];
-      if (!(typeof (regexAssersion && dirName) === "string")) {
-        throw new TypeError(
-          "regexAssersion and dirName values must be of type string"
-        );
-      }
-      const filesToLint = globby.sync([dirName], {
-        deep: recursive ? true : false
-      });
-      const results = filesToLint.map((file: string) => {
-        const dirSegments = file.split("/");
-        const fileName = dirSegments[dirSegments.length - 1];
-        const passed = new RegExp(regexAssersion).test(fileName);
-        return {
-          fileName,
-          regexAssersion,
-          passed
-        };
-      });
-      return {
-        dirName,
-        results
-      };
-    });
-    console.log(chalk.green(`${pkg.name} [v${pkg.version}]:\n`));
-    lintedDirectories.forEach(({ dirName, results }: DirectoryLintResult) => {
-      console.log(chalk.yellow(`  ${dirName}/`));
-      results.forEach(
-        ({ fileName, regexAssersion, passed }: FileLintResult) => {
-          console.log(
-            passed
-              ? chalk.green(`    ${fileName} ✓`)
-              : chalk.red(`    ${fileName} ✗ (${regexAssersion})`)
+    const lintedDirectories: DirectoryLintResult[] = Object.keys(regex).map(
+      (dirName: string) => {
+        const regexAssersion = regex[dirName];
+        if (!(typeof (regexAssersion && dirName) === "string")) {
+          throw new TypeError(
+            "regexAssersion and dirName values must be of type string"
           );
+        } else {
+          return {
+            dirName,
+            files: globby
+              .sync([dirName], {
+                deep: recursive ? true : false
+              })
+              .map((file: string) => {
+                const dirSegments = file.split("/");
+                const baseDir = dirSegments.shift();
+                const fileName = dirSegments.pop();
+                const dirPath = dirSegments;
+                const passed = fileName
+                  ? new RegExp(regexAssersion).test(fileName)
+                  : false;
+                return {
+                  fileName,
+                  baseDir,
+                  dirPath,
+                  regexAssersion,
+                  passed
+                };
+              })
+          };
+        }
+      }
+    );
+    console.log(chalk.green(`${pkg.name} [v${pkg.version}]:\n`));
+    let total = 0;
+    let totalPassed = 0;
+    let totalFailed = 0;
+    lintedDirectories.forEach(({ dirName, files }) => {
+      files.forEach(
+        ({ dirPath, fileName, regexAssersion, passed }: FileLintResult) => {
+          total++;
+          console.log(
+            chalk.yellow(
+              `  ${dirName}/${
+                dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
+              }`
+            )
+          );
+          if (passed === true) {
+            totalPassed++;
+            console.log(chalk.green(`    ${fileName} ✓`));
+          } else {
+            totalFailed++;
+            console.log(chalk.red(`    ${fileName} ✗ (${regexAssersion})`));
+          }
         }
       );
     });
-    displayTotalAssersionResults(lintedDirectories);
+    console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total})`));
+    if (totalFailed > 0) {
+      console.log(chalk.red.bold(`Failed: (${totalFailed}/${total})`));
+      process.exit(1);
+    }
+    process.exit(0);
   }).argv;
