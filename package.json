@@ -16,6 +16,24 @@
   },
   "author": "Bryce R. McWilliams <https://brycemcwilliams.com>",
   "license": "MIT",
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "collectCoverage": true
+  },
   "dependencies": {
     "@types/jest": "^24.0.15",
     "chalk": "^2.4.2",
