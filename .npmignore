@@ -1,7 +1,5 @@
-build
 .*
 file-linter.json
-index*
 script
 src
 webpack.config.js
@@ -15,3 +13,4 @@ bin
 Dockerfile
 Makefile
 docker-compose.yml
+coverage

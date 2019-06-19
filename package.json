@@ -1,17 +1,16 @@
 {
   "name": "file-linter",
-  "version": "0.0.3",
+  "version": "0.0.4-rc.1",
   "description": "Regex File Linter",
-  "main": "./dist/file-linter",
+  "main": "./build/index.js",
   "bin": {
-    "file-lint": "./dist/file-linter"
+    "file-lint": "./build/index.js"
   },
   "scripts": {
-    "prepare": "npm run dist",
+    "prepare": "npm run test && npm run build",
     "build": "tsc",
-    "dist": "npm run build && uglifyjs ./build/index.js -o ./dist/file-linter -c -m",
-    "dev": "ts-node-dev --respawn --transpileOnly ./src/index.ts",
-    "prod": "tsc && node ./build/index.js",
+    "dev": "ts-node-dev --respawn --transpileOnly ./src",
+    "prod": "tsc && node ./build",
     "test": "jest"
   },
   "author": "Bryce R. McWilliams <https://brycemcwilliams.com>",
@@ -35,7 +34,6 @@
     "collectCoverage": true
   },
   "dependencies": {
-    "@types/jest": "^24.0.15",
     "chalk": "^2.4.2",
     "find-up": "^4.0.0",
     "globby": "^9.2.0",
@@ -45,12 +43,12 @@
     "@types/chalk": "^2.2.0",
     "@types/find-up": "^2.1.1",
     "@types/globby": "^9.1.0",
+    "@types/jest": "^24.0.15",
     "@types/node": "^12.0.2",
     "@types/yargs": "^13.0.0",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
     "ts-node-dev": "^1.0.0-pre.39",
-    "typescript": "^3.4.5",
-    "uglify-js": "^3.6.0"
+    "typescript": "^3.4.5"
   }
 }
