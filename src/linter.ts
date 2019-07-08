@@ -1,6 +1,7 @@
 import findUp from 'find-up';
 import fs from 'fs';
 import globby from 'globby';
+import cpy from 'cpy';
 
 export interface FileLintRegex {
   [key: string]: string;
@@ -83,5 +84,11 @@ export default class FileLinter<FileLinterType> {
       };
     });
   };
-  fixDirectories = (recursive: boolean) => {};
+  fixDirectories = (files: string[]) => {
+    return files.map((file) => {
+      return cpy(file, file, {
+        rename: basname => fixName,
+      })
+    })
+  };
 }
