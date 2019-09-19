@@ -7,7 +7,7 @@ Regex file linter.
 Run the following command in your terminal emulator:
 
 ```
-npx filter-linter ./
+npx file-linter ./
 ```
 
 [![NPM](https://nodei.co/npm/file-linter.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/file-linter/)
