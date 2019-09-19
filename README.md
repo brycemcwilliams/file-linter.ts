@@ -1,4 +1,5 @@
 # File Linter
+[![Build Status](https://travis-ci.com/brycemcwilliams/file-linter.ts.svg?branch=master)](https://travis-ci.com/brycemcwilliams/file-linter.ts)
 
 Regex file linter.
 
