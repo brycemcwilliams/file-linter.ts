@@ -87,7 +87,7 @@ export default class FileLinter<FileLinterType> {
   fixDirectories = (files: string[]) => {
     return files.map((file) => {
       return cpy(file, file, {
-        rename: basname => fixName,
+        rename: basename => basename,
       })
     })
   };
