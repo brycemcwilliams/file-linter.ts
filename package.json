@@ -2,6 +2,7 @@
   "name": "file-linter",
   "version": "0.0.4-rc.1",
   "description": "Regex File Linter",
+  "keywords": ["file", "linter"],
   "main": "./build/index.js",
   "bin": {
     "file-lint": "./build/index.js"
