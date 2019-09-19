@@ -6,6 +6,10 @@
   "bin": {
     "file-lint": "./build/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brycemcwilliams/file-linter.ts.git"
+  },
   "scripts": {
     "prepare": "npm run test && npm run build",
     "build": "tsc",
