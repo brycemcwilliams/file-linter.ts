@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import FileLinter from './linter';
+import FileLinter from './';
 
 const fileLinter = new FileLinter();
 
