@@ -74,7 +74,7 @@ describe("linter", () => {
       const fixedFiles = fileLinter.fixDirectories(files);
       expect(fixedFiles).toEqual([
         {
-          fileName: failingFileName,
+          absolutePath: failingTestFile,
           absoluteLintedPath: "src/thisIsNotGoodFileName.js"
         }
       ]);
