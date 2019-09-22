@@ -2,8 +2,7 @@
 import chalk from 'chalk';
 import yargs from 'yargs';
 
-import FileLinter from './linter';
-import { IDirectoryLintResult, IFileLintResult } from './types';
+import FileLinter, { IDirectoryLintResult, IFileLintResult } from './linter';
 
 const pkg = require("../package.json");
 
@@ -41,7 +40,7 @@ yargs
     let totalPassed = 0;
     let totalFailed = 0;
     let previousDirPath = "";
-    lintedDirectories.forEach(({ dirName, files }: IDirectoryLintResult) => {
+    lintedDirectories.forEach(({ dirName, files }: IDirectoryLintResult) =>
       files.forEach(
         ({ dirPath, fileName, regexAssersion, passed }: IFileLintResult) => {
           total++;
@@ -66,8 +65,8 @@ yargs
           }
           previousDirPath = currentDirPath;
         }
-      );
-    });
+      )
+    );
     console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total}) ✓`));
     if (totalFailed > 0) {
       console.log(chalk.red.bold(`Failed: (${totalFailed}/${total}) ✗`));
@@ -80,7 +79,7 @@ yargs
           )
         );
         const fixedDirectories = fileLinter.fixDirectories(lintedDirectories);
-        console.log(fixedDirectories);
+        console.log(JSON.stringify({ fixedDirectories }, null, 2));
       } else {
         throw new Error("Failed assersions");
       }
