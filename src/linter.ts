@@ -25,7 +25,7 @@ export interface IDirectoryLintResult {
 }
 
 export interface IFixedDirectoryLint {
-  fileName: string;
+  absolutePath: string;
   absoluteLintedPath: string;
 }
 
@@ -106,20 +106,24 @@ export default class FileLinter<TFileLinter> {
     directories.forEach(({ files }: IDirectoryLintResult) => {
       files
         .filter(({ passed }: IFileLintResult) => passed === false)
-        .forEach(({ fileName, absolutePath, baseDir }: IFileLintResult) => {
-          const lowerCaseFirstLetter =
-            fileName.charAt(0).toLowerCase() + fileName.slice(1);
-          // TODO: Allow for external rename function
-          const lintedFileName = lowerCaseFirstLetter
-            .replace(new RegExp("-", "g"), "")
-            .replace(new RegExp(" ", "g"), "");
-          const absoluteLintedPath = `${baseDir}/${lintedFileName}`;
-          fs.renameSync(absolutePath, absoluteLintedPath);
-          fixedDirectories.push({
-            fileName,
-            absoluteLintedPath
-          });
-        });
+        .forEach(
+          ({ fileName, absolutePath, baseDir, dirPath }: IFileLintResult) => {
+            const lowerCaseFirstLetter =
+              fileName.charAt(0).toLowerCase() + fileName.slice(1);
+            // TODO: Allow for external rename function
+            const lintedFileName = lowerCaseFirstLetter
+              .replace(new RegExp("-", "g"), "")
+              .replace(new RegExp(" ", "g"), "");
+            const absoluteLintedPath = `${baseDir}/${
+              dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
+            }${lintedFileName}`;
+            fs.renameSync(absolutePath, absoluteLintedPath);
+            fixedDirectories.push({
+              absolutePath,
+              absoluteLintedPath
+            });
+          }
+        );
     });
     return fixedDirectories;
   };

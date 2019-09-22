@@ -37,8 +37,9 @@ yargs
     pkg.description,
     {},
     ({ regex, recursive, fix, debug }: any) => {
-      if (debug)
+      if (debug) {
         console.log(JSON.stringify({ regex, recursive, fix, debug }, null, 2));
+      }
       if (!(typeof regex === "object")) {
         throw new TypeError("Regex values must be of type object");
       }
@@ -83,16 +84,15 @@ yargs
       console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total}) ✓`));
       if (totalFailed > 0) {
         console.log(chalk.red.bold(`Failed: (${totalFailed}/${total}) ✗`));
+        const fileInfoText = `file${totalFailed <= 1 ? "" : "s"}`;
+        const fileInfo = chalk.green.bold(
+          `Attempting to fix: ${totalFailed} ${fileInfoText}`
+        );
         if (fix) {
-          console.log(
-            chalk.green.bold(
-              `Attempting to fix: ${totalFailed} file${
-                totalFailed <= 1 ? "" : "s"
-              }`
-            )
-          );
+          console.log(fileInfo);
           const fixedDirectories = fileLinter.fixDirectories(lintedDirectories);
-          console.log(JSON.stringify({ fixedDirectories }, null, 2));
+          if (debug) console.log(JSON.stringify({ fixedDirectories }, null, 2));
+          console.log(chalk.green.bold(`Successfully linted ${fileInfoText}`));
         } else {
           throw new Error("Failed assersions");
         }
