@@ -1,60 +1,84 @@
-import FileLinter from './linter';
+import fs from 'fs';
+
+import FileLinter from './';
 
 const fileLinter = new FileLinter();
 
 describe("linter", () => {
-  test("lintDirectories_withRecusriveOption_returnsAllLintedFiles", () => {
-    expect(fileLinter).toBeDefined();
-    const files = fileLinter.lintDirectories(true);
-    expect(files).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          dirName: "src",
-          files: expect.arrayContaining([
-            expect.objectContaining({
-              baseDir: "src",
-              fileName: "index.ts",
-              passed: true
-            })
-          ])
-        })
-      ])
-    );
+  describe("lintDirectories", () => {
+    test("withRecusriveOption_shouldReturnAllLintedFiles", () => {
+      expect(fileLinter).toBeDefined();
+      const files = fileLinter.lintDirectories(true);
+      expect(files).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            dirName: "src",
+            files: expect.arrayContaining([
+              expect.objectContaining({
+                baseDir: "src",
+                fileName: "index.ts",
+                passed: true
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    test("withoutRecusriveOption_shouldReturnAllLintedFiles", () => {
+      expect(fileLinter).toBeDefined();
+      const files = fileLinter.lintDirectories(false);
+      expect(files).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            dirName: "src",
+            files: expect.arrayContaining([
+              expect.objectContaining({
+                baseDir: "src",
+                fileName: "index.ts",
+                passed: true
+              })
+            ])
+          })
+        ])
+      );
+    });
+
+    test("withConfigPathSet_shouldReturnAllLintedFiles", () => {
+      expect(fileLinter).toBeDefined();
+      const files = fileLinter.lintDirectories(false);
+      expect(files).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            dirName: "src",
+            files: expect.arrayContaining([
+              expect.objectContaining({
+                baseDir: "src",
+                fileName: "index.ts",
+                passed: true
+              })
+            ])
+          })
+        ])
+      );
+    });
   });
-  test("lintDirectories_withoutRecusriveOption_returnsAllLintedFiles", () => {
-    expect(fileLinter).toBeDefined();
-    const files = fileLinter.lintDirectories(false);
-    expect(files).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          dirName: "src",
-          files: expect.arrayContaining([
-            expect.objectContaining({
-              baseDir: "src",
-              fileName: "index.ts",
-              passed: true
-            })
-          ])
-        })
-      ])
-    );
-  });
-  test("lintDirectories_withConfigPathSet_returnsAllLintedFiles", () => {
-    expect(fileLinter).toBeDefined();
-    const files = fileLinter.lintDirectories(false);
-    expect(files).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          dirName: "src",
-          files: expect.arrayContaining([
-            expect.objectContaining({
-              baseDir: "src",
-              fileName: "index.ts",
-              passed: true
-            })
-          ])
-        })
-      ])
-    );
+
+  describe("fixDirectories", () => {
+    test("withFailedFilename_shouldReturnCorrectlyLintedFilename", () => {
+      expect(fileLinter).toBeDefined();
+      const failingFileName = "ThisIsNotGood--FileName.js";
+      const failingTestFile = `src/${failingFileName}`;
+      fs.writeFileSync(failingTestFile, "hello");
+      const files = fileLinter.lintDirectories(false);
+      const fixedFiles = fileLinter.fixDirectories(files);
+      expect(fixedFiles).toEqual([
+        {
+          fileName: failingFileName,
+          absoluteLintedPath: "src/thisIsNotGoodFileName.js"
+        }
+      ]);
+      fs.unlinkSync(fixedFiles[0].absoluteLintedPath);
+    });
   });
 });

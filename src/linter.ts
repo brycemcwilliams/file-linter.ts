@@ -1,49 +1,56 @@
 import findUp from 'find-up';
 import fs from 'fs';
 import globby from 'globby';
-import cpy from 'cpy';
 
-export interface FileLintRegex {
+export interface IFileLintRegex {
   [key: string]: string;
 }
 
-export interface FileLintConfig {
-  regex: FileLintRegex;
+export interface IFileLintConfig {
+  regex: IFileLintRegex;
 }
 
-export interface FileLintResult {
+export interface IFileLintResult {
+  absolutePath: string;
   dirPath: string[];
-  baseDir?: string;
-  fileName?: string;
+  baseDir: string;
+  fileName: string;
   regexAssersion: string;
   passed: boolean;
 }
 
-export interface DirectoryLintResult {
+export interface IDirectoryLintResult {
   dirName: string;
-  files: FileLintResult[];
+  files: IFileLintResult[];
 }
 
-type FileLinterProps = {
+export interface IFixedDirectoryLint {
+  absolutePath: string;
+  absoluteLintedPath: string;
+}
+
+export type TFileLinterProps = {
   configPath: string;
 };
 
-type FileLinterState = {
+export type TFileLinterState = {
   configPath?: string;
-  config: FileLintConfig;
+  config: IFileLintConfig;
 };
 
-export type FileLinterType = FileLinterProps & FileLinterState;
+export type TFileLinter = TFileLinterProps & TFileLinterState;
 
-export default class FileLinter<FileLinterType> {
-  state: FileLinterState = {
+export default class FileLinter<TFileLinter> {
+  state: TFileLinterState = {
     configPath: "",
     config: {
       regex: {
-        src: "(^([a-zA-Z0-9]+?[A-Z]?[a-z0-9]*)(\\.[a-z]{1,}){1,}$)"
+        build: "(^([a-z]+?)([A-Z]?[a-zA-Z0-9]*)(\\.[a-z]{1,}){1,}$)",
+        src: "(^([a-z]+?)([A-Z]?[a-zA-Z0-9]*)(\\.[a-z]{1,}){1,}$)"
       }
     }
   };
+
   constructor() {
     this.state.configPath = findUp.sync([
       ".file-linter",
@@ -55,6 +62,10 @@ export default class FileLinter<FileLinterType> {
       ? JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8"))
       : this.state.config;
   }
+
+  /**
+   * @param  {boolean} recursive
+   */
   lintDirectories = (recursive: boolean) => {
     const { regex } = this.state.config;
     return Object.keys(regex).map((dirName: string) => {
@@ -66,14 +77,16 @@ export default class FileLinter<FileLinterType> {
             deep: recursive ? true : false
           })
           .map((file: string) => {
+            const absolutePath = file;
             const dirSegments = file.split("/");
-            const baseDir = dirSegments.shift();
-            const fileName = dirSegments.pop();
+            const baseDir = dirSegments.shift() || "";
+            const fileName = dirSegments.pop() || "";
             const dirPath = dirSegments;
             const passed = fileName
               ? new RegExp(regexAssersion).test(fileName)
               : false;
             return {
+              absolutePath,
               fileName,
               baseDir,
               dirPath,
@@ -84,11 +97,34 @@ export default class FileLinter<FileLinterType> {
       };
     });
   };
-  fixDirectories = (files: string[]) => {
-    return files.map((file) => {
-      return cpy(file, file, {
-        rename: basename => basename,
-      })
-    })
+
+  /**
+   * @param  {IDirectoryLintResult[]} directories
+   */
+  fixDirectories = (directories: IDirectoryLintResult[]) => {
+    let fixedDirectories: IFixedDirectoryLint[] = [];
+    directories.forEach(({ files }: IDirectoryLintResult) => {
+      files
+        .filter(({ passed }: IFileLintResult) => passed === false)
+        .forEach(
+          ({ fileName, absolutePath, baseDir, dirPath }: IFileLintResult) => {
+            const lowerCaseFirstLetter =
+              fileName.charAt(0).toLowerCase() + fileName.slice(1);
+            // TODO: Allow for external rename function
+            const lintedFileName = lowerCaseFirstLetter
+              .replace(new RegExp("-", "g"), "")
+              .replace(new RegExp(" ", "g"), "");
+            const absoluteLintedPath = `${baseDir}/${
+              dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
+            }${lintedFileName}`;
+            fs.renameSync(absolutePath, absoluteLintedPath);
+            fixedDirectories.push({
+              absolutePath,
+              absoluteLintedPath
+            });
+          }
+        );
+    });
+    return fixedDirectories;
   };
 }
