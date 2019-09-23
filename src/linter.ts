@@ -34,7 +34,7 @@ export type TFileLinterProps = {
 };
 
 export type TFileLinterState = {
-  configPath?: string;
+  configPath: string;
   config: IFileLintConfig;
 };
 
@@ -45,19 +45,20 @@ export default class FileLinter<TFileLinter> {
     configPath: "",
     config: {
       regex: {
-        build: "(^([a-z]+?)([A-Z]?[a-zA-Z0-9]*)(\\.[a-z]{1,}){1,}$)",
-        src: "(^([a-z]+?)([A-Z]?[a-zA-Z0-9]*)(\\.[a-z]{1,}){1,}$)"
+        build: "^([a-z]+?)([\\w\\-]+?)(\\.[\\w]{1,}){1,}$",
+        src: "^([a-z]+?)([\\w\\-]+?)(\\.[\\w]{1,}){1,}$"
       }
     }
   };
 
   constructor() {
-    this.state.configPath = findUp.sync([
-      ".file-linter",
-      ".file-linter.json",
-      "file-linter",
-      "file-linter.json"
-    ]);
+    this.state.configPath =
+      findUp.sync([
+        ".file-linter",
+        ".file-linter.json",
+        "file-linter",
+        "file-linter.json"
+      ]) || "";
     this.state.config = this.state.configPath
       ? JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8"))
       : this.state.config;
@@ -108,12 +109,8 @@ export default class FileLinter<TFileLinter> {
         .filter(({ passed }: IFileLintResult) => passed === false)
         .forEach(
           ({ fileName, absolutePath, baseDir, dirPath }: IFileLintResult) => {
-            const lowerCaseFirstLetter =
-              fileName.charAt(0).toLowerCase() + fileName.slice(1);
             // TODO: Allow for external rename function
-            const lintedFileName = lowerCaseFirstLetter
-              .replace(new RegExp("-", "g"), "")
-              .replace(new RegExp(" ", "g"), "");
+            const lintedFileName = this.toCamelCase(fileName);
             const absoluteLintedPath = `${baseDir}/${
               dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
             }${lintedFileName}`;
@@ -127,4 +124,14 @@ export default class FileLinter<TFileLinter> {
     });
     return fixedDirectories;
   };
+
+  /**
+   * @param  {string} fileName
+   */
+  toCamelCase = (fileName: string) =>
+    fileName
+      .replace(/\s(.)/g, (x: string) => x.toUpperCase())
+      .replace(/\s/g, "")
+      .replace(/\-\-/g, "-") // TODO: Optional replace doubles
+      .replace(/^(.)/, (x: string) => x.toLowerCase());
 }

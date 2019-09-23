@@ -48,7 +48,7 @@ yargs
       );
       if (debug) console.log(JSON.stringify({ lintedDirectories }, null, 2));
       console.log(
-        chalk.green.bold(`${pkg.name} [v${pkg.version}](${__dirname}):\n`)
+        chalk.green.bold(`${pkg.name} [v${pkg.version}](${process.cwd()}):\n`)
       );
       let total = 0;
       let totalPassed = 0;

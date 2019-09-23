@@ -75,10 +75,19 @@ describe("linter", () => {
       expect(fixedFiles).toEqual([
         {
           absolutePath: failingTestFile,
-          absoluteLintedPath: "src/thisIsNotGoodFileName.js"
+          absoluteLintedPath: "src/thisIsNotGood-FileName.js"
         }
       ]);
       fs.unlinkSync(fixedFiles[0].absoluteLintedPath);
+    });
+  });
+
+  describe("toCamelCase", () => {
+    test("withFailedFilename_shouldReturnCorrectlyLintedFilename", () => {
+      expect(fileLinter).toBeDefined();
+      const failingFileName = "ThisIsNotGood--FileName.js";
+      const res = fileLinter.toCamelCase(failingFileName);
+      expect(res).toEqual("thisIsNotGood-FileName.js");
     });
   });
 });
