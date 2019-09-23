@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import FileLinter from './';
+const FileLinter = require("./");
 
 const fileLinter = new FileLinter();
 
