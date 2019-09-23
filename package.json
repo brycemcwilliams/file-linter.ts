@@ -8,7 +8,7 @@
   ],
   "main": "./build/index.js",
   "bin": {
-    "file-lint": "./build/index.js"
+    "file-linter": "./build/index.js"
   },
   "repository": {
     "type": "git",
