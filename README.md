@@ -1,28 +1,44 @@
 # File Linter
 
 [![Build Status](https://travis-ci.com/brycemcwilliams/file-linter.ts.svg?branch=master)](https://travis-ci.com/brycemcwilliams/file-linter.ts)
+[![TypeScript](https://badgen.net/badge/icon/typescript?icon=typescript&label)](https://badgen.net/badge/icon/typescript?icon=typescript&label)
+[![Total downloads](https://badgen.net/npm/dt/file-linter)](https://badgen.net/npm/dt/file-linter)
 [![GZipped Size](https://badgen.net/bundlephobia/minzip/file-linter)](https://bundlephobia.com/result?p=file-linter)
+<br/>
+[![NPM](https://nodei.co/npm/file-linter.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/file-linter/)
 
-A Simple File Linter that helps your project filenames conform to a predetermined regex pattern.
+A simple file linter that helps keep filenames consistent via regex.
 
 ## CLI Usage
 
-Run the following command in your terminal emulator to run with default config:
+Available options:
 
-```
-npx file-linter
-```
-
-Run the following command in your terminal emulator for help:
-
-```
-npx file-linter --help
-```
-
-Run the following command in your terminal emulator for a recursive fix solution:
-
-```
-npx file-linter -rf
+```sh
+  --help           Show help                                           [boolean]
+  --version        Show version number                                 [boolean]
+  --recursive, -r  Recursively search for files       [boolean] [default: false]
+  --fix, -f        Fix failing files                  [boolean] [default: false]
+  --debug, -d      Display JSON objects               [boolean] [default: false]
+  --silent, -s     Hide all output                    [boolean] [default: false]
+  --watch, -w      Watch files for change             [boolean] [default: false]
 ```
 
-[![NPM](https://nodei.co/npm/file-linter.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/file-linter/)
+## Module Usage
+
+Installation:
+
+```sh
+npm i file-linter
+```
+
+Example:
+
+```js
+const FileLinter = require("file-linter");
+
+const fileLinter = new FileLinter();
+
+const lintedFiles = fileLinter.lintDirectories();
+
+console.log({ lintedFiles });
+```

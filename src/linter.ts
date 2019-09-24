@@ -2,6 +2,13 @@ import findUp from 'find-up';
 import fs from 'fs';
 import globby from 'globby';
 
+import { toCamelCase } from './util';
+
+export interface IFileLinter {
+  lintDirectories(recursive: boolean): IDirectoryLintResult[];
+  fixDirectories(directories: IDirectoryLintResult[]): IFixedDirectoryLint[];
+}
+
 export interface IFileLintRegex {
   [key: string]: string;
 }
@@ -40,7 +47,7 @@ export type TFileLinterState = {
 
 export type TFileLinter = TFileLinterProps & TFileLinterState;
 
-export default class FileLinter<TFileLinter> {
+export default class FileLinter<TFileLinter> implements IFileLinter {
   state: TFileLinterState = {
     configPath: "",
     config: {
@@ -52,16 +59,18 @@ export default class FileLinter<TFileLinter> {
   };
 
   constructor() {
-    this.state.configPath =
-      findUp.sync([
-        ".file-linter",
-        ".file-linter.json",
-        "file-linter",
-        "file-linter.json"
-      ]) || "";
-    this.state.config = this.state.configPath
-      ? JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8"))
-      : this.state.config;
+    this.state = {
+      configPath:
+        findUp.sync([
+          ".file-linter",
+          ".file-linter.json",
+          "file-linter",
+          "file-linter.json"
+        ]) || "",
+      config: this.state.configPath
+        ? JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8"))
+        : this.state.config
+    };
   }
 
   /**
@@ -110,7 +119,7 @@ export default class FileLinter<TFileLinter> {
         .forEach(
           ({ fileName, absolutePath, baseDir, dirPath }: IFileLintResult) => {
             // TODO: Allow for external rename function
-            const lintedFileName = this.toCamelCase(fileName);
+            const lintedFileName = toCamelCase(fileName);
             const absoluteLintedPath = `${baseDir}/${
               dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
             }${lintedFileName}`;
@@ -124,14 +133,4 @@ export default class FileLinter<TFileLinter> {
     });
     return fixedDirectories;
   };
-
-  /**
-   * @param  {string} fileName
-   */
-  toCamelCase = (fileName: string) =>
-    fileName
-      .replace(/\s(.)/g, (x: string) => x.toUpperCase())
-      .replace(/\s/g, "")
-      .replace(/\-\-/g, "-") // TODO: Optional replace doubles
-      .replace(/^(.)/, (x: string) => x.toLowerCase());
 }
