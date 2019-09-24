@@ -1,11 +1,13 @@
 # File Linter
 
 [![Build Status](https://travis-ci.com/brycemcwilliams/file-linter.ts.svg?branch=master)](https://travis-ci.com/brycemcwilliams/file-linter.ts)
+[![TypeScript](https://badgen.net/badge/icon/typescript?icon=typescript&label)](https://badgen.net/badge/icon/typescript?icon=typescript&label)
+[![Total downloads](https://badgen.net/npm/dt/file-linter)](https://badgen.net/npm/dt/file-linter)
 [![GZipped Size](https://badgen.net/bundlephobia/minzip/file-linter)](https://bundlephobia.com/result?p=file-linter)
 <br/>
 [![NPM](https://nodei.co/npm/file-linter.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/file-linter/)
 
-A Simple File Linter that helps your project filenames conform to a predetermined regex pattern.
+A simple file linter that helps keep filenames consistent via regex.
 
 ## CLI Usage
 
@@ -58,11 +60,11 @@ npm i file-linter
 Code example:
 
 ```js
-const FileLinter = require('file-linter');
+const FileLinter = require("file-linter");
 
 const fileLinter = new FileLinter();
 
-const lintedFiles = fileLinter.lintDirectories(true);
+const lintedFiles = fileLinter.lintDirectories();
 
 console.log({ lintedFiles });
 ```
