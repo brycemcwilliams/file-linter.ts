@@ -11,53 +11,27 @@ A simple file linter that helps keep filenames consistent via regex.
 
 ## CLI Usage
 
-Run the following commands in your terminal emulator;
-
-Default config:
+Available options:
 
 ```sh
-npx file-linter
-```
-
-Help:
-
-```sh
-npx file-linter --help
-```
-
-Recursive fix:
-
-```sh
-npx file-linter -rf
-```
-
-Watch for changes:
-
-```sh
-npx file-linter -w
-```
-
-Silent:
-
-```sh
-npx file-linter -s
-```
-
-JSON output:
-
-```sh
-npx file-linter -j
+  --help           Show help                                           [boolean]
+  --version        Show version number                                 [boolean]
+  --recursive, -r  Recursively search for files       [boolean] [default: false]
+  --fix, -f        Fix failing files                  [boolean] [default: false]
+  --debug, -d      Display JSON objects               [boolean] [default: false]
+  --silent, -s     Hide all output                    [boolean] [default: false]
+  --watch, -w      Watch files for change             [boolean] [default: false]
 ```
 
 ## Module Usage
 
-Install the module:
+Installation:
 
 ```sh
 npm i file-linter
 ```
 
-Code example:
+Example:
 
 ```js
 const FileLinter = require("file-linter");
