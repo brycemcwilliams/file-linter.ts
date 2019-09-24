@@ -1,6 +1,6 @@
 {
   "name": "file-linter",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Regex File Linter",
   "keywords": [
     "file",
