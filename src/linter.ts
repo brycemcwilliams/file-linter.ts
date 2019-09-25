@@ -59,18 +59,16 @@ export default class FileLinter<TFileLinter> implements IFileLinter {
   };
 
   constructor() {
-    this.state = {
-      configPath:
-        findUp.sync([
-          ".file-linter",
-          ".file-linter.json",
-          "file-linter",
-          "file-linter.json"
-        ]) || "",
-      config: this.state.configPath
-        ? JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8"))
-        : this.state.config
-    };
+    this.state.configPath =
+      findUp.sync([
+        ".file-linter",
+        ".file-linter.json",
+        "file-linter",
+        "file-linter.json"
+      ]) || "";
+    this.state.config = this.state.configPath
+      ? JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8"))
+      : this.state.config;
   }
 
   /**
