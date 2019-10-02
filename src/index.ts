@@ -4,7 +4,7 @@ const chalk = require("chalk");
 const fs = require("fs");
 const yargs = require("yargs");
 
-const FileLinter = require("./linter");
+const FileLinter = require("./linter").default;
 const { lint } = require("./util");
 
 const pkg = require("../package.json");
