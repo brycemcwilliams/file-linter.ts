@@ -9,7 +9,7 @@
 
 Linter that helps keep Files consistent via Regex
 
-## CLI Usage
+## Help
 
 ```sh
 file-linter --help
@@ -27,23 +27,29 @@ Available options:
 --watch, -w      Watch files for change             [boolean] [default: false]
 ```
 
-## Module Usage
+## Usage
 
-Installation:
+### Installation
+
+Module || CLI
 
 ```sh
-npm i file-linter --save
+npm i file-linter
+```
 
-# -- OR GLOBALLY --
+Globally (CLI)
 
+```
 npm i -g file-linter
+```
 
-# -- OR ONCE OFF --
+Once off execution
 
+```
 npx file-linter
 ```
 
-Example:
+### Example:
 
 ```js
 const fileLinter = require("file-linter");
@@ -53,7 +59,9 @@ const lintedDirectories = fileLinter.lintDirectories();
 console.log({ lintedDirectories });
 ```
 
-For the brave (always current recursive fix watch):
+### For the brave
+
+Always current recursive fix watch
 
 ```
 npx file-linter -rfw
