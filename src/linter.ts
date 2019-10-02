@@ -18,7 +18,7 @@ export interface IFileLintConfig {
 }
 
 export interface IFileLintResult {
-  absolutePath: string;
+  relativePath: string;
   dirPath: string[];
   baseDir: string;
   fileName: string;
@@ -32,8 +32,8 @@ export interface IDirectoryLintResult {
 }
 
 export interface IFixedDirectoryLint {
-  absolutePath: string;
-  absoluteLintedPath: string;
+  relativePath: string;
+  relativeLintPath: string;
 }
 
 export type TFileLinterProps = {
@@ -41,6 +41,7 @@ export type TFileLinterProps = {
 };
 
 export type TFileLinterState = {
+  isCLI: boolean;
   configPath: string;
   config: IFileLintConfig;
 };
@@ -49,6 +50,7 @@ export type TFileLinter = TFileLinterProps & TFileLinterState;
 
 export default class FileLinter<TFileLinter> implements IFileLinter {
   state: TFileLinterState = {
+    isCLI: false,
     configPath: "",
     config: {
       regex: {
@@ -58,7 +60,8 @@ export default class FileLinter<TFileLinter> implements IFileLinter {
     }
   };
 
-  constructor() {
+  constructor(isCLI?: boolean) {
+    this.state.isCLI = isCLI ? true : false;
     this.state.configPath =
       findUp.sync([
         ".file-linter",
@@ -74,7 +77,7 @@ export default class FileLinter<TFileLinter> implements IFileLinter {
   /**
    * @param  {boolean} recursive
    */
-  lintDirectories = (recursive: boolean) => {
+  lintDirectories = (recursive?: boolean) => {
     const { regex } = this.state.config;
     return Object.keys(regex).map((dirName: string) => {
       const regexAssersion = regex[dirName];
@@ -85,7 +88,7 @@ export default class FileLinter<TFileLinter> implements IFileLinter {
             deep: recursive ? true : false
           })
           .map((file: string) => {
-            const absolutePath = file;
+            const relativePath = file;
             const dirSegments = file.split("/");
             const baseDir = dirSegments.shift() || "";
             const fileName = dirSegments.pop() || "";
@@ -94,7 +97,7 @@ export default class FileLinter<TFileLinter> implements IFileLinter {
               ? new RegExp(regexAssersion).test(fileName)
               : false;
             return {
-              absolutePath,
+              relativePath,
               fileName,
               baseDir,
               dirPath,
@@ -111,20 +114,20 @@ export default class FileLinter<TFileLinter> implements IFileLinter {
    */
   fixDirectories = (directories: IDirectoryLintResult[]) => {
     let fixedDirectories: IFixedDirectoryLint[] = [];
-    directories.forEach(({ files }: IDirectoryLintResult) => {
+    directories.map(({ files }: IDirectoryLintResult) => {
       files
         .filter(({ passed }: IFileLintResult) => passed === false)
-        .forEach(
-          ({ fileName, absolutePath, baseDir, dirPath }: IFileLintResult) => {
+        .map(
+          ({ fileName, relativePath, baseDir, dirPath }: IFileLintResult) => {
             // TODO: Allow for external rename function
             const lintedFileName = toCamelCase(fileName);
-            const absoluteLintedPath = `${baseDir}/${
+            const relativeLintPath = `${baseDir}/${
               dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
             }${lintedFileName}`;
-            fs.renameSync(absolutePath, absoluteLintedPath);
+            fs.renameSync(relativePath, relativeLintPath);
             fixedDirectories.push({
-              absolutePath,
-              absoluteLintedPath
+              relativePath,
+              relativeLintPath
             });
           }
         );

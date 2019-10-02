@@ -48,15 +48,17 @@
     "yargs": "^13.2.4"
   },
   "devDependencies": {
+    "typescript": "^3.6.3",
+    "tslib": "^1.10.0",
     "@types/chalk": "^2.2.0",
     "@types/find-up": "^2.1.1",
     "@types/globby": "^9.1.0",
-    "@types/jest": "^24.0.15",
-    "@types/node": "^12.7.5",
+    "@types/jest": "^24.0.18",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.7.7",
     "@types/yargs": "^13.0.0",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
-    "ts-node-dev": "^1.0.0-pre.39",
-    "typescript": "^3.4.5"
+    "ts-node-dev": "^1.0.0-pre.39"
   }
 }

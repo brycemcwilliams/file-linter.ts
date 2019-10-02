@@ -1,19 +1,20 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
-import fs from 'fs';
-import yargs from 'yargs';
 
-import FileLinter from './linter';
-import { lint } from './util';
+const chalk = require("chalk");
+const fs = require("fs");
+const yargs = require("yargs");
+
+const FileLinter = require("./linter");
+const { lint } = require("./util");
 
 const pkg = require("../package.json");
 
 const isCLI = require.main === module;
+const fileLinter = new FileLinter(isCLI);
 
 if (!isCLI) {
-  module.exports = FileLinter;
+  module.exports = fileLinter;
 } else {
-  const fileLinter = new FileLinter();
   yargs
     .scriptName(pkg.name)
     .option("recursive", {

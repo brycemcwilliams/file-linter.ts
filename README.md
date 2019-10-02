@@ -7,20 +7,20 @@
 <br/>
 [![NPM](https://nodei.co/npm/file-linter.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/file-linter/)
 
-A simple file linter that helps keep filenames consistent via regex.
+File System aware Linter that helps keep files consistent via regex.
 
 ## CLI Usage
 
 Available options:
 
 ```sh
-  --help           Show help                                           [boolean]
-  --version        Show version number                                 [boolean]
-  --recursive, -r  Recursively search for files       [boolean] [default: false]
-  --fix, -f        Fix failing files                  [boolean] [default: false]
-  --debug, -d      Display JSON objects               [boolean] [default: false]
-  --silent, -s     Hide all output                    [boolean] [default: false]
-  --watch, -w      Watch files for change             [boolean] [default: false]
+--help           Show help                                           [boolean]
+--version        Show version number                                 [boolean]
+--recursive, -r  Recursively search for files       [boolean] [default: false]
+--fix, -f        Fix failing files                  [boolean] [default: false]
+--debug, -d      Display JSON objects               [boolean] [default: false]
+--silent, -s     Hide all output                    [boolean] [default: false]
+--watch, -w      Watch files for change             [boolean] [default: false]
 ```
 
 ## Module Usage
@@ -29,6 +29,10 @@ Installation:
 
 ```sh
 npm i file-linter
+# -- OR GLOBALLY --
+npm i -g file-linter
+# -- OR ONCE OFF --
+npx file-linter
 ```
 
 Example:
