@@ -31,28 +31,30 @@ Available options:
 
 ### Installation
 
-Module || CLI
+Module || CLI:
 
 ```sh
 npm i file-linter
 ```
 
-Globally (CLI)
+Globally (CLI):
 
 ```
 npm i -g file-linter
 ```
 
-Once off execution
+Once off execution:
 
 ```
 npx file-linter
 ```
 
-### Example:
+### Example
 
 ```js
 const fileLinter = require("file-linter");
+
+console.log({ fileLinter });
 
 const lintedDirectories = fileLinter.lintDirectories();
 
@@ -61,7 +63,7 @@ console.log({ lintedDirectories });
 
 ### For the brave
 
-Always current recursive fix watch
+Hot recursive fix watch
 
 ```
 npx file-linter -rfw
