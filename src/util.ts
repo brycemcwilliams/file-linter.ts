@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 
-import { IDirectoryLintResult, IFileLinter, IFileLintRegex, IFileLintResult } from './linter';
+import {
+    IFileLinter, IFileLinterDirectory, IFileLinterEffect, IFileLinterFix, IFileLinterRegex
+} from './type';
 
 const pkg = require("../package.json");
 
@@ -15,7 +17,13 @@ export const toCamelCase = (fileName: string) =>
     .replace(/^(.)/, (x: string) => x.toLowerCase());
 
 /**
- * @param  {IFileLintRegex} regex
+ * @param  {*} object
+ */
+export const print = (object: any) =>
+  console.log(JSON.stringify(object, null, 2));
+
+/**
+ * @param  {IFileLinterRegex} regex
  * @param  {boolean} recursive
  * @param  {boolean} fix
  * @param  {boolean} debug
@@ -23,43 +31,48 @@ export const toCamelCase = (fileName: string) =>
  */
 export const lint = (
   fileLinter: IFileLinter,
-  regex: IFileLintRegex,
+  regex: IFileLinterRegex,
   recursive: boolean,
   fix: boolean,
   debug: boolean,
   silent: boolean
 ) => {
-  if (debug) {
-    console.log(JSON.stringify({ regex, recursive, fix, debug }, null, 2));
-  }
+  if (debug) print({ regex, recursive, fix, debug });
+
   if (!(typeof regex === "object")) {
     throw new TypeError("Regex values must be of type object");
   }
-  const lintedDirectories: IDirectoryLintResult[] = fileLinter.lintDirectories(
+
+  const lintedDirectories: IFileLinterDirectory[] = fileLinter.lintDirectories(
     recursive
   );
-  if (debug) console.log(JSON.stringify({ lintedDirectories }, null, 2));
+
+  if (debug) print({ lintedDirectories });
+
   if (!silent) {
     console.log(
       chalk.green.bold(`${pkg.name} [v${pkg.version}](${process.cwd()}):\n`)
     );
   }
+
   let total = 0;
   let totalPassed = 0;
   let totalFailed = 0;
   let previousDirPath = "";
-  lintedDirectories.forEach(({ dirName, files }: IDirectoryLintResult) =>
+  lintedDirectories.forEach(({ dirName, files }: IFileLinterDirectory) =>
     files.forEach(
-      ({ dirPath, fileName, regexAssersion, passed }: IFileLintResult) => {
+      ({ dirPath, fileName, regexAssersion, passed }: IFileLinterEffect) => {
         total++;
         const currentDirPath = `${dirName}/${
           dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
         }`;
+
         if (!(currentDirPath === previousDirPath)) {
           if (!silent) {
             console.log(chalk.yellow.bold(`  ${currentDirPath}`));
           }
         }
+
         if (passed === true) {
           totalPassed++;
           if (!silent) {
@@ -77,27 +90,33 @@ export const lint = (
             );
           }
         }
+
         previousDirPath = currentDirPath;
       }
     )
   );
+
   if (!silent) {
     console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total}) ✓`));
   }
+
   if (totalFailed > 0) {
     if (!silent) {
       console.log(chalk.red.bold(`Failed: (${totalFailed}/${total}) ✗`));
     }
+
     const fileInfoText = `file${totalFailed <= 1 ? "" : "s"}`;
     const fileInfo = chalk.green.bold(
       `Attempting to fix: ${totalFailed} ${fileInfoText}`
     );
+
     if (fix) {
       if (!silent) console.log(fileInfo);
+
       const fixedDirectories = fileLinter.fixDirectories(lintedDirectories);
-      if (debug) {
-        console.log(JSON.stringify({ fixedDirectories }, null, 2));
-      }
+
+      if (debug) print({ fixedDirectories });
+
       if (!silent) {
         console.log(chalk.green.bold(`Successfully linted ${fileInfoText}`));
       }
@@ -105,4 +124,6 @@ export const lint = (
       throw new Error("Failed assersions");
     }
   }
+
+  return lintedDirectories;
 };
