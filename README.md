@@ -1,16 +1,19 @@
 # File Linter
 
 [![NPM](https://nodei.co/npm/file-linter.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/file-linter/)
-<br/>
+</br>
+
 [![Build Status](https://travis-ci.com/brycemcwilliams/file-linter.ts.svg?branch=master)](https://travis-ci.com/brycemcwilliams/file-linter.ts)
-[![Latest Tag](https://badgen.net/github/tag/brycemcwilliams/file-linter.ts)](https://badgen.net/github/tag/brycemcwilliams/file-linter.ts)
-[![TypeScript](https://badgen.net/badge/icon/typescript?icon=typescript&label)](https://badgen.net/badge/icon/typescript?icon=typescript&label)
 [![Total downloads](https://badgen.net/npm/dt/file-linter)](https://badgen.net/npm/dt/file-linter)
 [![GZipped Size](https://badgen.net/bundlephobia/minzip/file-linter)](https://bundlephobia.com/result?p=file-linter)
 
-File System aware Linter that helps keep files consistent via regex.
+Linter that helps keep Files consistent via Regex
 
-## CLI Usage
+## Help
+
+```sh
+file-linter --help
+```
 
 Available options:
 
@@ -24,28 +27,44 @@ Available options:
 --watch, -w      Watch files for change             [boolean] [default: false]
 ```
 
-## Module Usage
+## Usage
 
-Installation:
+### Installation
+
+Module || CLI:
 
 ```sh
-npm i file-linter --save
+npm i file-linter
+```
 
-# -- OR GLOBALLY --
+Globally (CLI):
 
+```
 npm i -g file-linter
+```
 
-# -- OR ONCE OFF --
+Once off execution:
 
+```
 npx file-linter
 ```
 
-Example:
+### Example
 
 ```js
 const fileLinter = require("file-linter");
 
+console.log({ fileLinter });
+
 const lintedDirectories = fileLinter.lintDirectories();
 
 console.log({ lintedDirectories });
+```
+
+### For the brave
+
+Hot recursive fix watch
+
+```
+npx file-linter -rfw
 ```

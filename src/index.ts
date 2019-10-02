@@ -55,12 +55,23 @@ if (!isCLI) {
       {},
       ({ regex, recursive, fix, debug, silent, watch }: any) => {
         if (watch) {
-          fs.watch(process.cwd(), (type: string, fileName: string) => {
-            if (!silent) {
-              console.log(chalk.yellow(`File: ${fileName} (${type})`));
+          process.stdout.write("\x1b[2J");
+          process.stdout.write("\x1b[0f");
+
+          fs.watch(
+            process.cwd(),
+            { recursive },
+            (type: string, fileName: string) => {
+              if (!silent) {
+                console.log(chalk.yellow(`File: ${fileName} (${type})`));
+              }
+
+              process.stdout.write("\x1b[2J");
+              process.stdout.write("\x1b[0f");
+
+              lint(fileLinter, regex, recursive, fix, debug, silent);
             }
-            lint(fileLinter, regex, recursive, fix, debug, silent);
-          });
+          );
         } else {
           lint(fileLinter, regex, recursive, fix, debug, silent);
         }
