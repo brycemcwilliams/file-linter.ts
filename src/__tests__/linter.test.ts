@@ -1,10 +1,9 @@
 import fs from 'fs';
 
-const FileLinter = require("./");
-
-const fileLinter = new FileLinter();
+import FileLinter from '../linter';
 
 describe("linter", () => {
+  const fileLinter = new FileLinter();
   describe("lintDirectories", () => {
     test("withRecusriveOption_shouldReturnAllLintedFiles", () => {
       expect(fileLinter).toBeDefined();
@@ -27,7 +26,7 @@ describe("linter", () => {
 
     test("withoutRecusriveOption_shouldReturnAllLintedFiles", () => {
       expect(fileLinter).toBeDefined();
-      const files = fileLinter.lintDirectories(false);
+      const files = fileLinter.lintDirectories();
       expect(files).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -46,7 +45,7 @@ describe("linter", () => {
 
     test("withConfigPathSet_shouldReturnAllLintedFiles", () => {
       expect(fileLinter).toBeDefined();
-      const files = fileLinter.lintDirectories(false);
+      const files = fileLinter.lintDirectories();
       expect(files).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -70,15 +69,15 @@ describe("linter", () => {
       const failingFileName = "ThisIsNotGood--FileName.js";
       const failingTestFile = `src/${failingFileName}`;
       fs.writeFileSync(failingTestFile, "hello");
-      const files = fileLinter.lintDirectories(false);
+      const files = fileLinter.lintDirectories();
       const fixedFiles = fileLinter.fixDirectories(files);
       expect(fixedFiles).toEqual([
         {
-          absolutePath: failingTestFile,
-          absoluteLintedPath: "src/thisIsNotGood-FileName.js"
+          relativePath: failingTestFile,
+          relativeLintPath: "src/thisIsNotGood-FileName.js"
         }
       ]);
-      fs.unlinkSync(fixedFiles[0].absoluteLintedPath);
+      fs.unlinkSync(fixedFiles[0].relativeLintPath);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { toCamelCase } from './util';
+import { toCamelCase } from '../util';
 
 describe("util", () => {
   describe("toCamelCase", () => {
