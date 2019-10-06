@@ -67,7 +67,7 @@ console.log({ lintedDirectories });
 
 ### For the brave
 
-Hot recursive fix watch
+Hot recursive fix watch:
 
 ```
 npx file-linter -rfw
