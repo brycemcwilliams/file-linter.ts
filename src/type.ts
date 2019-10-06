@@ -1,13 +1,19 @@
 export interface IFileLinter {
   lintDirectories(recursive: boolean): IFileLinterDirectory[];
-  fixDirectories(directories: IFileLinterDirectory[]): IFileLinterFix[];
+  fixDirectories(
+    directories: IFileLinterDirectory[],
+    enforce?: string
+  ): IFileLinterDirectoryFix[];
 }
+
+export type Metadata = { [key: string]: object };
 
 export interface IFileLinterRegex {
   [key: string]: string;
 }
 
 export interface IFileLinterConfig {
+  enforce: string;
   regex: IFileLinterRegex;
 }
 
@@ -18,6 +24,8 @@ export interface IFileLinterEffect {
   fileName: string;
   regexAssersion: string;
   passed: boolean;
+  relativeLintPath: string;
+  lintedFileName: string;
 }
 
 export interface IFileLinterDirectory {
@@ -25,7 +33,13 @@ export interface IFileLinterDirectory {
   files: IFileLinterEffect[];
 }
 
+export interface IFileLinterDirectoryFix {
+  dirName: string;
+  files: IFileLinterFix[];
+}
+
 export interface IFileLinterFix {
+  result: any;
   relativePath: string;
   relativeLintPath: string;
 }

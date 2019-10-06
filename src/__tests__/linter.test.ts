@@ -1,9 +1,8 @@
-import fs from 'fs';
-
-import FileLinter from '../linter';
-
 describe("linter", () => {
+  const fs = require("fs");
+  const FileLinter = require("../linter");
   const fileLinter = new FileLinter();
+
   describe("lintDirectories", () => {
     test("withRecusriveOption_shouldReturnAllLintedFiles", () => {
       expect(fileLinter).toBeDefined();
@@ -75,16 +74,26 @@ describe("linter", () => {
       fs.writeFileSync(failingTestFile, "hello");
 
       const files = fileLinter.lintDirectories();
-      const fixedFiles = fileLinter.fixDirectories(files);
+      const fixedFiles = fileLinter.fixDirectories(files, "camel");
 
       expect(fixedFiles).toEqual([
-        {
-          relativePath: failingTestFile,
-          relativeLintPath: "src/thisIsNotGood-FileName.js"
-        }
+        expect.objectContaining({
+          dirName: "build",
+          files: expect.arrayContaining([])
+        }),
+        expect.objectContaining({
+          dirName: "src",
+          files: expect.arrayContaining([
+            expect.objectContaining({
+              result: undefined,
+              relativePath: failingTestFile,
+              relativeLintPath: "src/thisIsNotGoodFileName.js"
+            })
+          ])
+        })
       ]);
 
-      fs.unlinkSync(fixedFiles[0].relativeLintPath);
+      fs.unlinkSync(fixedFiles[1].files[0].relativeLintPath);
     });
   });
 });

@@ -1,19 +1,42 @@
-const fileLinter = require("../");
-import { lint, toCamelCase } from '../util';
-
 describe("util", () => {
-  describe("toCamelCase", () => {
-    test("withFailedFilename_shouldReturnCorrectlyLintedFilename", () => {
-      expect(toCamelCase).toBeDefined();
-      const failingFileName = "ThisIsNotGood--FileName.js";
+  const fileLinter = require("../");
+  const { resetCursor, print, lint } = require("../util");
 
-      const res = toCamelCase(failingFileName);
-      expect(res).toEqual("thisIsNotGood-FileName.js");
+  describe("resetCursor", () => {
+    test("withSilentAndNotDebug_shouldResetCursor", () => {
+      process.stdout.write = jest.fn();
+      resetCursor(false, false);
+      expect(process.stdout.write).toHaveBeenCalledTimes(2);
+    });
+
+    test("withSilentAndDebug_shouldNotResetCursor", () => {
+      process.stdout.write = jest.fn();
+      resetCursor(false, true);
+      expect(process.stdout.write).toHaveBeenCalledTimes(0);
+    });
+
+    test("withNotSilentAndDebug_shouldNotResetCursor", () => {
+      process.stdout.write = jest.fn();
+      resetCursor(true, true);
+      expect(process.stdout.write).toHaveBeenCalledTimes(0);
     });
   });
+
+  describe("print", () => {
+    test("withValidMetaObject_shouldPrintToStandardOut", () => {
+      console.log = jest.fn();
+      print({ hello: "world" });
+      expect(console.log).toHaveBeenCalledTimes(1);
+      expect(console.log).toHaveBeenCalledWith(
+        JSON.stringify({ hello: "world" }, null, 2)
+      );
+    });
+  });
+
   describe("lint", () => {
     test("withValidLinterAndDirectory_shouldReturnCorrectlyLintedDirectories", () => {
       const args = {
+        enforce: "camel",
         regex: {
           build: "^([a-z]+?)([\\w\\-]+?)(\\.[\\w]{1,}){1,}$",
           src: "^([a-z]+?)([\\w\\-]+?)(\\.[\\w]{1,}){1,}$"
@@ -26,6 +49,7 @@ describe("util", () => {
 
       const res = lint(
         fileLinter,
+        args.enforce,
         args.regex,
         args.recursive,
         args.fix,
