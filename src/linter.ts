@@ -1,18 +1,20 @@
-import findUp from 'find-up';
-import fs from 'fs';
-import globby from 'globby';
+const findUp = require("find-up");
+const fs = require("fs");
+const globby = require("globby");
 
 import {
-    IFileLinter, IFileLinterDirectory, IFileLinterEffect, IFileLinterFix, IFileLinterRegex,
-    TFileLinter, TFileLinterState
+    IFileLinter, IFileLinterDirectory, IFileLinterEffect, IFileLinterRegex, TFileLinter,
+    TFileLinterState
 } from './type';
-import { print, toCamelCase } from './util';
 
-export default class FileLinter<TFileLinter> implements IFileLinter {
+const toCase = require("./case");
+
+module.exports = class FileLinter<TFileLinter> implements IFileLinter {
   state: TFileLinterState = {
     isCLI: false,
     configPath: "",
     config: {
+      enforce: "camel",
       regex: {
         build: "^([a-z]+?)([\\w\\-]+?)(\\.[\\w]{1,}){1,}$",
         src: "^([a-z]+?)([\\w\\-]+?)(\\.[\\w]{1,}){1,}$"
@@ -29,71 +31,64 @@ export default class FileLinter<TFileLinter> implements IFileLinter {
         "file-linter",
         "file-linter.json"
       ]) || "";
-    this.state.config = this.state.configPath
-      ? JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8"))
-      : this.state.config;
+    this.state.config =
+      JSON.parse(fs.readFileSync(this.state.configPath).toString("utf8")) ||
+      this.state.config;
   }
 
   /**
    * @param  {boolean} recursive
    */
   lintDirectories = (recursive?: boolean) =>
-    Object.keys(this.state.config.regex).map((dirName: string) => {
-      return {
-        dirName,
-        files: globby
-          .sync([dirName], {
-            deep: recursive ? true : false
-          })
-          .map((file: string) => {
-            const relativePath = file;
-            const dirPath = file.split("/");
-            const fileName = dirPath.pop() || "";
-            const baseDir = dirPath.shift() || "";
-            const regexAssersion = this.state.config.regex[dirName];
-            const passed = fileName
-              ? new RegExp(regexAssersion).test(fileName)
-              : false;
-
-            return {
-              relativePath,
-              dirPath,
-              fileName,
-              baseDir,
-              regexAssersion,
-              passed
-            };
-          })
-      };
-    });
+    Object.keys(this.state.config.regex).map((dirName: string) => ({
+      dirName,
+      files: globby
+        .sync([dirName], {
+          deep: recursive || false
+        })
+        .map((filePath: string) => ({
+          relativePath: filePath,
+          dirPath: filePath.split("/")
+        }))
+        .map((props: IFileLinterEffect) => ({
+          ...props,
+          fileName: props.dirPath.pop() || "",
+          baseDir: props.dirPath.shift() || ""
+        }))
+        .map((props: IFileLinterEffect) => ({
+          ...props,
+          regexAssersion: this.state.config.regex[dirName]
+        }))
+        .map((props: IFileLinterEffect) => ({
+          ...props,
+          passed: props.fileName
+            ? new RegExp(props.regexAssersion).test(props.fileName)
+            : false
+        }))
+    }));
 
   /**
-   * @param  {IDirectory[]} directories
+   * @param  {IFileLinterDirectory[]} directories
+   * @param  {string} enforce?
    */
-  fixDirectories = (directories: IFileLinterDirectory[]) => {
-    let fixedFiles: IFileLinterFix[] = [];
-
-    directories.forEach(({ files }: IFileLinterDirectory) => {
-      files
+  fixDirectories = (directories: IFileLinterDirectory[], enforce?: string) =>
+    directories.map(({ files, dirName }: IFileLinterDirectory) => ({
+      dirName,
+      files: files
         .filter(({ passed }: IFileLinterEffect) => passed === false)
-        .forEach(
-          ({ fileName, relativePath, baseDir, dirPath }: IFileLinterEffect) => {
-            // TODO: Allow for external rename function
-            const lintedFileName = toCamelCase(fileName);
-            const relativeLintPath = `${baseDir}/${
-              dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
-            }${lintedFileName}`;
-
-            fs.renameSync(relativePath, relativeLintPath);
-
-            fixedFiles.push({
-              relativePath,
-              relativeLintPath
-            });
-          }
-        );
-    });
-
-    return fixedFiles;
-  };
-}
+        .map((props: IFileLinterEffect) => ({
+          ...props,
+          lintedFileName: toCase[enforce || "camel"](props.fileName)
+        }))
+        .map((props: IFileLinterEffect) => ({
+          ...props,
+          relativeLintPath: `${props.baseDir}/${
+            props.dirPath.length > 0 ? `${props.dirPath.join("/")}/` : ""
+          }${props.lintedFileName}`
+        }))
+        .map((props: IFileLinterEffect) => ({
+          ...props,
+          result: fs.renameSync(props.relativePath, props.relativeLintPath)
+        }))
+    }));
+};

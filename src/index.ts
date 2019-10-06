@@ -4,8 +4,8 @@ const chalk = require("chalk");
 const fs = require("fs");
 const yargs = require("yargs");
 
-const FileLinter = require("./linter").default;
-const { lint } = require("./util");
+const FileLinter = require("./linter");
+const { lint, resetCursor } = require("./util");
 
 const pkg = require("../package.json");
 
@@ -17,6 +17,12 @@ if (!isCLI) {
 } else {
   yargs
     .scriptName(pkg.name)
+    .option("enforce", {
+      alias: "e",
+      type: "string",
+      describe: "Filename function",
+      default: "camel"
+    })
     .option("recursive", {
       alias: "r",
       type: "boolean",
@@ -53,27 +59,24 @@ if (!isCLI) {
       "$0",
       pkg.description,
       {},
-      ({ regex, recursive, fix, debug, silent, watch }: any) => {
+      ({ regex, enforce, recursive, fix, debug, silent, watch }: any) => {
         if (watch) {
-          process.stdout.write("\x1b[2J");
-          process.stdout.write("\x1b[0f");
+          resetCursor(debug, silent);
 
           fs.watch(
             process.cwd(),
-            { recursive },
+            { recursive: recursive || false },
             (type: string, fileName: string) => {
               if (!silent) {
-                console.log(chalk.yellow(`File: ${fileName} (${type})`));
+                console.log(chalk.yellow.bold(`File: ${fileName} (${type}) ⚠`));
               }
 
-              process.stdout.write("\x1b[2J");
-              process.stdout.write("\x1b[0f");
-
-              lint(fileLinter, regex, recursive, fix, debug, silent);
+              resetCursor(debug, silent);
+              lint(fileLinter, enforce, regex, recursive, fix, debug, silent);
             }
           );
         } else {
-          lint(fileLinter, regex, recursive, fix, debug, silent);
+          lint(fileLinter, enforce, regex, recursive, fix, debug, silent);
         }
       }
     ).argv;

@@ -1,28 +1,32 @@
-import chalk from 'chalk';
+const chalk = require("chalk");
 
 import {
-    IFileLinter, IFileLinterDirectory, IFileLinterEffect, IFileLinterFix, IFileLinterRegex
+    IFileLinter, IFileLinterDirectory, IFileLinterEffect, IFileLinterRegex, Metadata
 } from './type';
 
 const pkg = require("../package.json");
 
 /**
- * @param  {string} fileName
+ * @param  {boolean} debug
+ * @param  {boolean} silent
  */
-export const toCamelCase = (fileName: string) =>
-  fileName
-    .replace(/\s(.)/g, (x: string) => x.toUpperCase())
-    .replace(/\s/g, "")
-    .replace(/\-\-/g, "-") // TODO: Optional replace doubles
-    .replace(/^(.)/, (x: string) => x.toLowerCase());
+export const resetCursor = (
+  debug: boolean = false,
+  silent: boolean = false
+) => {
+  if (!silent) process.stdout.write("\x1b[2J");
+  if (!silent) process.stdout.write("\x1b[0f");
+};
 
 /**
- * @param  {*} object
+ * @param  {Metadata} object
  */
-export const print = (object: any) =>
+export const print = (object: Metadata) =>
   console.log(JSON.stringify(object, null, 2));
 
 /**
+ * @param  {IFileLinter} fileLinter
+ * @param  {string} enforce
  * @param  {IFileLinterRegex} regex
  * @param  {boolean} recursive
  * @param  {boolean} fix
@@ -31,21 +35,20 @@ export const print = (object: any) =>
  */
 export const lint = (
   fileLinter: IFileLinter,
+  enforce: string,
   regex: IFileLinterRegex,
   recursive: boolean,
   fix: boolean,
   debug: boolean,
   silent: boolean
 ) => {
-  if (debug) print({ regex, recursive, fix, debug });
+  if (debug) print({ args: { enforce, regex, recursive, fix, debug } });
 
   if (!(typeof regex === "object")) {
     throw new TypeError("Regex values must be of type object");
   }
 
-  const lintedDirectories: IFileLinterDirectory[] = fileLinter.lintDirectories(
-    recursive
-  );
+  const lintedDirectories = fileLinter.lintDirectories(recursive);
 
   if (debug) print({ lintedDirectories });
 
@@ -55,14 +58,22 @@ export const lint = (
     );
   }
 
-  let total = 0;
-  let totalPassed = 0;
-  let totalFailed = 0;
+  const lintedFiles = lintedDirectories
+    .map(({ files }) => files)
+    .reduce((a, b) => a.concat(b), []);
+
+  const total = lintedFiles.length;
+  const totalPassed = lintedFiles.filter(
+    ({ passed }: IFileLinterEffect) => passed === true
+  ).length;
+  const totalFailed = lintedFiles.filter(
+    ({ passed }: IFileLinterEffect) => passed === false
+  ).length;
+
   let previousDirPath = "";
-  lintedDirectories.forEach(({ dirName, files }: IFileLinterDirectory) =>
+  lintedDirectories.forEach(({ dirName, files }: IFileLinterDirectory) => {
     files.forEach(
       ({ dirPath, fileName, regexAssersion, passed }: IFileLinterEffect) => {
-        total++;
         const currentDirPath = `${dirName}/${
           dirPath.length > 0 ? `${dirPath.join("/")}/` : ""
         }`;
@@ -73,13 +84,11 @@ export const lint = (
           }
         }
 
-        if (passed === true) {
-          totalPassed++;
+        if (passed) {
           if (!silent) {
             console.log(chalk.green(`    ${fileName} ✓`));
           }
         } else {
-          totalFailed++;
           if (!silent) {
             console.log(
               chalk.red(
@@ -93,10 +102,10 @@ export const lint = (
 
         previousDirPath = currentDirPath;
       }
-    )
-  );
+    );
+  });
 
-  if (!silent) {
+  if (!silent && totalPassed > 0) {
     console.log(chalk.green.bold(`\nPassed: (${totalPassed}/${total}) ✓`));
   }
 
@@ -106,19 +115,26 @@ export const lint = (
     }
 
     const fileInfoText = `file${totalFailed <= 1 ? "" : "s"}`;
-    const fileInfo = chalk.green.bold(
-      `Attempting to fix: ${totalFailed} ${fileInfoText}`
+    const fileInfo = chalk.yellow.bold(
+      `Attempting to fix: (${totalFailed} ${fileInfoText}) ⚠`
     );
 
     if (fix) {
       if (!silent) console.log(fileInfo);
 
-      const fixedDirectories = fileLinter.fixDirectories(lintedDirectories);
+      const fixedDirectories = fileLinter.fixDirectories(
+        lintedDirectories,
+        enforce
+      );
 
       if (debug) print({ fixedDirectories });
 
       if (!silent) {
-        console.log(chalk.green.bold(`Successfully linted ${fileInfoText}`));
+        console.log(
+          chalk.green.bold(
+            `Successfully linted: (${totalFailed} ${fileInfoText}) ✓`
+          )
+        );
       }
     } else {
       throw new Error("Failed assersions");

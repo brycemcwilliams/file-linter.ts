@@ -11,6 +11,8 @@ Linter that helps keep Files consistent via Regex
 
 ## Help
 
+Run this command for options:
+
 ```sh
 file-linter --help
 ```
@@ -31,25 +33,27 @@ Available options:
 
 ### Installation
 
-Module || CLI:
+Module:
 
 ```sh
 npm i file-linter
 ```
 
-Globally (CLI):
+Global:
 
 ```
 npm i -g file-linter
 ```
 
-Once off execution:
+Once-off:
 
 ```
 npx file-linter
 ```
 
 ### Example
+
+Usage as a module:
 
 ```js
 const fileLinter = require("file-linter");
