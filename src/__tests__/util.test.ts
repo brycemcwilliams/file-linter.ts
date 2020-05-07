@@ -1,23 +1,23 @@
-describe("util", () => {
-  const fileLinter = require("../");
-  const { resetCursor, print, lint } = require("../util");
+import * as fileLinter from "../";
+import { resetCursor, print, lint } from "../util";
 
+describe("util", () => {
   describe("resetCursor", () => {
     test("withSilentAndNotDebug_shouldResetCursor", () => {
       process.stdout.write = jest.fn();
-      resetCursor(false, false);
+      resetCursor(false);
       expect(process.stdout.write).toHaveBeenCalledTimes(2);
     });
 
     test("withSilentAndDebug_shouldNotResetCursor", () => {
       process.stdout.write = jest.fn();
-      resetCursor(false, true);
+      resetCursor(true);
       expect(process.stdout.write).toHaveBeenCalledTimes(0);
     });
 
     test("withNotSilentAndDebug_shouldNotResetCursor", () => {
       process.stdout.write = jest.fn();
-      resetCursor(true, true);
+      resetCursor(true);
       expect(process.stdout.write).toHaveBeenCalledTimes(0);
     });
   });
@@ -25,10 +25,10 @@ describe("util", () => {
   describe("print", () => {
     test("withValidMetaObject_shouldPrintToStandardOut", () => {
       console.log = jest.fn();
-      print({ hello: "world" });
+      print({ hello: { a: 1 } });
       expect(console.log).toHaveBeenCalledTimes(1);
       expect(console.log).toHaveBeenCalledWith(
-        JSON.stringify({ hello: "world" }, null, 2)
+        JSON.stringify({ hello: { a: 1 } }, null, 2)
       );
     });
   });
@@ -47,19 +47,17 @@ describe("util", () => {
         silent: true
       };
 
-      const res = lint(
-        fileLinter,
-        args.enforce,
-        args.regex,
-        args.recursive,
-        args.fix,
-        args.debug,
-        args.silent
-      );
-
-      expect(res).toEqual(
-        expect.arrayContaining([expect.objectContaining({ dirName: "src" })])
-      );
+      expect(() => {
+        lint(
+          fileLinter,
+          args.enforce,
+          args.regex,
+          args.recursive,
+          args.fix,
+          args.debug,
+          args.silent
+        );
+      }).toThrowError(Error("Failed assersions"));
     });
   });
 });

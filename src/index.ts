@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-const chalk = require("chalk");
-const fs = require("fs");
-const yargs = require("yargs");
+import chalk from "chalk";
+import fs from "fs";
+import yargs from "yargs";
 
-const FileLinter = require("./linter");
-const { lint, resetCursor } = require("./util");
+import FileLinter from "./linter";
+import { lint, resetCursor } from "./util";
 
-const pkg = require("../package.json");
+import * as pkg from "../package.json";
 
 const isCLI = require.main === module;
 const fileLinter = new FileLinter(isCLI);
@@ -61,7 +61,7 @@ if (!isCLI) {
       {},
       ({ regex, enforce, recursive, fix, debug, silent, watch }: any) => {
         if (watch) {
-          resetCursor(debug, silent);
+          resetCursor(silent);
 
           fs.watch(
             process.cwd(),
@@ -71,7 +71,7 @@ if (!isCLI) {
                 console.log(chalk.yellow.bold(`File: ${fileName} (${type}) ⚠`));
               }
 
-              resetCursor(debug, silent);
+              resetCursor(silent);
               lint(fileLinter, enforce, regex, recursive, fix, debug, silent);
             }
           );

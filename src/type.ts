@@ -1,5 +1,5 @@
 export interface IFileLinter {
-  lintDirectories(recursive: boolean): IFileLinterDirectory[];
+  lintDirectories(recursive?: boolean): IFileLinterDirectory[];
   fixDirectories(
     directories: IFileLinterDirectory[],
     enforce?: string
@@ -18,14 +18,14 @@ export interface IFileLinterConfig {
 }
 
 export interface IFileLinterEffect {
-  relativePath: string;
-  dirPath: string[];
-  baseDir: string;
-  fileName: string;
-  regexAssersion: string;
+  relativePath?: string;
+  dirPath?: string[];
+  fileName?: string;
+  baseDir?: string;
+  regexAssersion?: string;
   passed: boolean;
-  relativeLintPath: string;
-  lintedFileName: string;
+  relativeLintPath?: string;
+  lintedFileName?: string;
 }
 
 export interface IFileLinterDirectory {
@@ -40,8 +40,8 @@ export interface IFileLinterDirectoryFix {
 
 export interface IFileLinterFix {
   result: any;
-  relativePath: string;
-  relativeLintPath: string;
+  relativePath?: string;
+  relativeLintPath?: string;
 }
 
 export type TFileLinterProps = {

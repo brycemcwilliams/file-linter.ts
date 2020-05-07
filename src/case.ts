@@ -5,7 +5,7 @@
 /**
  * @param  {string} fileName
  */
-export const camel = (fileName: string) =>
+const camel = (fileName: string) =>
   fileName
     .replace(/^(.)/, (x: string) => x.toLowerCase())
     .replace(/\s(.)/g, (x: string) => x.toUpperCase())
@@ -16,7 +16,7 @@ export const camel = (fileName: string) =>
 /**
  * @param  {string} fileName
  */
-export const pascal = (fileName: string) =>
+const pascal = (fileName: string) =>
   fileName
     .replace(/^(.)/, (x: string) => x.toUpperCase())
     .replace(/\s(.)/g, (x: string) => x.toUpperCase())
@@ -27,5 +27,21 @@ export const pascal = (fileName: string) =>
 /**
  * @param  {string} fileName
  */
-export const kebab = (fileName: string) =>
-  fileName.toLowerCase().replace(/\s/g, "-");
+const kebab = (fileName: string) => fileName.toLowerCase().replace(/\s/g, "-");
+
+export default (selectedCase: string, fileName: string) => {
+  switch (selectedCase) {
+    case "camel": {
+      return camel(fileName);
+    }
+    case "pascal": {
+      return pascal(fileName);
+    }
+    case "kebab": {
+      return kebab(fileName);
+    }
+    default: {
+      return camel(fileName);
+    }
+  }
+};
