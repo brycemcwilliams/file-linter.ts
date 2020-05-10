@@ -16,8 +16,8 @@
     "url": "git://github.com/brycemcwilliams/file-linter.ts.git"
   },
   "scripts": {
-    "prepare": "npm run test && npm run build",
-    "lint": "eslint ./",
+    "prepare": "npm run lint && npm run test && npm run build",
+    "lint": "eslint ./src/**/*.*",
     "build": "tsc",
     "dev": "ts-node-dev --respawn --transpileOnly ./src",
     "prod": "tsc && node ./build",

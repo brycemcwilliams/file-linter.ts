@@ -13,6 +13,8 @@
     "ecmaVersion": 2018
   },
   "plugins": ["@typescript-eslint"],
-  "rules": {}
+  "rules": {
+    "max-len": 0
+  },
+  "ignorePatterns": ["**/__tests__/**/*.*"]
 }
-
