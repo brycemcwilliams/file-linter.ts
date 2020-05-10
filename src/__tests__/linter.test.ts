@@ -67,7 +67,7 @@ describe("linter", () => {
   });
 
   describe("fixDirectories", () => {
-    test("withFailedFilename_shouldReturnCorrectlyLintedFilename", () => {
+    test.only("withFailedFilename_shouldReturnCorrectlyLintedFilename", () => {
       expect(fileLinter).toBeDefined();
       const failingFileName = "ThisIsNotGood--FileName.js";
       const failingTestFile = `src/${failingFileName}`;
@@ -94,9 +94,9 @@ describe("linter", () => {
         })
       ]);
 
-      // if (fixedFiles[1]) {
-      //   fs.unlinkSync(fixedFiles[1].files[0].relativeLintPath);
-      // }
+      if (fixedFiles[1]) {
+        fs.unlinkSync(failingTestFile);
+      }
     });
   });
 });

@@ -57,7 +57,7 @@ describe("util", () => {
           args.debug,
           args.silent
         );
-      }).toThrowError(Error("Failed assersions"));
+      }).toEqual(expect.arrayContaining([]));
     });
   });
 });

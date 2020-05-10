@@ -41,8 +41,10 @@ export const lint = (
   recursive: boolean,
   fix: boolean,
   debug: boolean,
-  silent: boolean
+  silent: boolean,
+  previousError?: string
 ) => {
+  if (previousError) throw new Error(previousError);
   if (debug) print({ args: { enforce, regex, recursive, fix, debug } });
 
   if (!(typeof regex === "object")) {
@@ -155,10 +157,17 @@ export const lint = (
           )
         );
       }
-
-      lint(fileLinter, enforce, regex, recursive, fix, debug, silent);
     } else {
-      throw new Error("Failed assersions");
+      lint(
+        fileLinter,
+        enforce,
+        regex,
+        recursive,
+        fix,
+        debug,
+        silent,
+        "Failed assersions"
+      );
     }
   }
 
